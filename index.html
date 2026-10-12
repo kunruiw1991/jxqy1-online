@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>剑侠情缘1 (1997 DOS硬盘整理版) — WebAssembly 在线网页版</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #131b33;
+      --panel-border: #283660;
+      --accent: #eab308;
+      --accent-hover: #facc15;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #172554 0%, #0b1020 65%, #060913 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    header {
+      width: 100%;
+      max-width: 1140px;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(19, 27, 51, 0.88);
+      border-bottom: 1px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      image-rendering: pixelated;
+    }
+    .brand-title {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      color: #fff;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--cyan);
+      display: block;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn {
+      background: #1e293b;
+      color: var(--text);
+      border: 1px solid var(--panel-border);
+      border-radius: 7px;
+      padding: 6px 11px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: inherit;
+    }
+    .btn:hover:not(:disabled) {
+      border-color: var(--cyan);
+      background: #263554;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-quicksave {
+      background: linear-gradient(135deg, #065f46, #047857);
+      border-color: #34d399;
+      color: #ecfdf5;
+    }
+    .btn-quicksave:hover:not(:disabled) {
+      background: linear-gradient(135deg, #047857, #059669);
+      border-color: #6ee7b7;
+    }
+    .lang-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+    .lang-badge.locked { border-color: rgba(234, 179, 8, 0.55); }
+    .cd-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      background: rgba(15, 23, 42, 0.85);
+      color: #bae6fd;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .cd-badge.muted {
+      border-color: #475569;
+      color: var(--muted);
+    }
+    .save-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #1e293b;
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--muted);
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .save-badge.ok { color: #6ee7b7; border-color: rgba(16, 185, 129, 0.5); background: rgba(16, 185, 129, 0.12); }
+    .save-badge.info { color: #bae6fd; border-color: rgba(56, 189, 248, 0.5); }
+    main {
+      width: 100%;
+      max-width: 1140px;
+      padding: 12px 16px 24px;
+      display: grid;
+      grid-template-columns: 1fr 310px;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .stage-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-width: 0;
+    }
+    #loaderPanel {
+      width: 100%;
+      background: rgba(11, 16, 32, 0.92);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .loader-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    #statusText {
+      font-weight: 600;
+      color: var(--accent);
+    }
+    #byteStats {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      color: var(--cyan);
+    }
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #0f172a;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+      margin-bottom: 10px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 5%;
+      background: linear-gradient(90deg, #38bdf8, #10b981, #eab308);
+      transition: width 0.2s ease;
+    }
+    .chunks-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+    }
+    @media (max-width: 600px) {
+      .chunks-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .chunk-chip {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 5px;
+      padding: 4px 6px;
+      font-size: 10.5px;
+      text-align: center;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+    .chunk-chip.loading {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.12);
+    }
+    .chunk-chip.done {
+      border-color: var(--emerald);
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.14);
+    }
+    .canvas-wrap {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      max-height: 540px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    canvas.emscripten {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      object-fit: fill;
+      outline: none;
+      image-rendering: pixelated;
+      cursor: crosshair;
+    }
+    #canvasWrap:fullscreen, #canvasWrap:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      aspect-ratio: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+    }
+    #canvasWrap:fullscreen #canvas, #canvasWrap:-webkit-full-screen #canvas {
+      width: min(100vw, calc(100vh * 1.6)) !important;
+      height: min(100vh, calc(100vw / 1.6)) !important;
+      max-width: 100vw;
+      max-height: 100vh;
+      aspect-ratio: 16 / 10;
+      object-fit: contain;
+    }
+    .setup-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(234, 179, 8, 0.18), transparent 60%),
+        radial-gradient(ellipse at 50% 100%, rgba(56, 189, 248, 0.14), transparent 60%),
+        rgba(6, 9, 19, 0.94);
+      overflow: auto;
+    }
+    .setup-overlay.hidden { display: none; }
+    .setup-card {
+      width: min(560px, 100%);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(7px, 1.5vw, 12px);
+    }
+    .setup-title {
+      font-size: clamp(18px, 3vw, 27px);
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      background: linear-gradient(90deg, #fde68a, #eab308, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .setup-sub { font-size: clamp(11.5px, 1.6vw, 13px); color: #cbd5e1; line-height: 1.45; }
+    .setup-group-label {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.4px;
+      margin-bottom: -4px;
+    }
+    .lang-options, .boot-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 520px) {
+      .lang-options, .boot-options { grid-template-columns: 1fr; }
+    }
+    .lang-opt, .boot-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 3px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: rgba(30, 41, 59, 0.85);
+      color: #f8fafc;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .lang-opt small, .boot-opt small {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .lang-opt:hover, .boot-opt:hover { border-color: var(--cyan); }
+    .lang-opt.selected, .boot-opt.selected {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.22), rgba(30, 41, 59, 0.92));
+      box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.24);
+    }
+    .lang-opt.selected::after, .boot-opt.selected::after {
+      content: '✔';
+      position: absolute;
+      top: 9px;
+      right: 11px;
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .btn-start {
+      align-self: center;
+      min-width: 230px;
+      padding: 11px 28px;
+      border-radius: 999px;
+      border: 1px solid #fde047;
+      background: linear-gradient(135deg, #d97706, #eab308);
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 8px 22px rgba(234, 179, 8, 0.28);
+      margin-top: 2px;
+    }
+    .btn-start:disabled { opacity: 0.6; cursor: progress; }
+    .btn-start:not(:disabled):hover { background: linear-gradient(135deg, #f59e0b, #facc15); }
+    .setup-notes { font-size: 11.5px; color: #a5b4fc; line-height: 1.5; }
+    .setup-adv a { font-size: 11px; color: var(--muted); }
+    /* Save & Party Inspector */
+    .inspector {
+      width: 100%;
+      margin-top: 10px;
+      min-height: 62px;
+      padding: 9px 12px;
+      background: rgba(15, 23, 42, 0.84);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    .insp-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .insp-title {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 12.5px;
+    }
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    @media (max-width: 720px) {
+      .slots-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .slot-card {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-size: 11px;
+    }
+    .slot-card.persisted {
+      border-color: rgba(16, 185, 129, 0.55);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .slot-card-top {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+    .slot-card-top span.tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+    .slot-card.persisted .slot-card-top span.tag {
+      color: #6ee7b7;
+    }
+    .slot-stats {
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 10.5px;
+    }
+    .vpad {
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+    }
+    .dpad-group, .action-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+    .key-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 38px;
+      text-align: center;
+      box-shadow: 0 2px 0 #0f172a;
+      transition: transform 0.06s ease, background 0.12s;
+    }
+    .key-btn:active, .key-btn.active {
+      transform: translateY(2px);
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    .key-btn.enter-btn {
+      background: #1d4ed8;
+      border-color: #60a5fa;
+    }
+    .key-btn.esc-btn {
+      background: #7c2d12;
+      border-color: #fb923c;
+    }
+    .side-panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 780px;
+      overflow-y: auto;
+    }
+    .side-section h3 {
+      margin: 0 0 6px 0;
+      font-size: 13.5px;
+      color: var(--accent);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 4px;
+    }
+    .shortcut-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .shortcut-table td {
+      padding: 3.5px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .shortcut-table td:first-child {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      color: var(--cyan);
+      font-weight: 600;
+      width: 44%;
+    }
+    .guide-box {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid #1e293b;
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+    .guide-box strong { color: #fff; }
+    .track-select {
+      width: 100%;
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="favicon.ico" alt="JXQY1">
+      <div>
+        <span class="brand-title">剑侠情缘1 · 1997 西山居 DOS 经典版 (WebAssembly 在线版)</span>
+        <span class="brand-sub">100% 浏览器原生运行 · 8分片流式加载 + IndexedDB 缓存 · 23轨原版CD音轨</span>
+      </div>
+    </div>
+    <div class="toolbar">
+      <span class="lang-badge" id="langBadge" title="字体模式在启动前选择">🇨🇳 简体中文</span>
+      <span class="cd-badge" id="cdBadge" title="点击切换背景音乐静音/播放">🎵 CD 音轨待命</span>
+      <button class="btn btn-quicksave" id="btnSyncSave" title="立即将模拟器内的 SAVE0..4.DAT 同步到浏览器 IndexedDB" disabled>⚡ 同步存档</button>
+      <span class="save-badge" id="saveBadge" title="游戏内存储进度时自动持久化到浏览器 IndexedDB">💾 存档自动持久化 (进度一~五)</span>
+      <button class="btn" id="btnFullscreen" title="全屏模式 (Esc 退出)">⛶ 全屏</button>
+      <button class="btn" id="btnExportSave" title="打包下载全部 SAVE0.DAT ~ SAVE4.DAT 存档">💾 导出存档</button>
+      <label class="btn" for="inputImportSave" title="导入 SAVE0.DAT~SAVE4.DAT 或 .zip 存档包">📂 导入存档</label>
+      <input type="file" id="inputImportSave" accept=".dat,.zip" multiple style="display:none">
+    </div>
+  </header>
+
+  <main>
+    <div class="stage-card">
+      <div id="loaderPanel">
+        <div class="loader-top">
+          <span id="statusText">正在初始化 DOSBox WebAssembly 引擎...</span>
+          <span id="byteStats">8 分片 · 14.40 MB</span>
+        </div>
+        <div class="progress-track">
+          <div id="progressFill"></div>
+        </div>
+        <div class="chunks-grid" id="chunksGrid">
+          <div class="chunk-chip" id="chip-0">Part 00</div>
+          <div class="chunk-chip" id="chip-1">Part 01</div>
+          <div class="chunk-chip" id="chip-2">Part 02</div>
+          <div class="chunk-chip" id="chip-3">Part 03</div>
+          <div class="chunk-chip" id="chip-4">Part 04</div>
+          <div class="chunk-chip" id="chip-5">Part 05</div>
+          <div class="chunk-chip" id="chip-6">Part 06</div>
+          <div class="chunk-chip" id="chip-7">Part 07</div>
+        </div>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas class="emscripten" id="canvas" tabindex="0" width="640" height="480" oncontextmenu="event.preventDefault()"></canvas>
+        <div class="setup-overlay" id="setupOverlay">
+          <div class="setup-card">
+            <div class="setup-title">剑侠情缘 · The Legend of Swordman (1997)</div>
+            <div class="setup-sub">西山居 1997 开山之作 · 独孤剑抗金武侠传奇<br>选择文字字库与启动方式后，点击 <b>▶ 开始游戏</b></div>
+
+            <div class="setup-group-label">1. 选择游戏字库 (GAME.CFG)</div>
+            <div class="lang-options" role="radiogroup" aria-label="Font mode">
+              <button class="lang-opt selected" data-font="chs" role="radio" aria-checked="true">
+                <span>🇨🇳 简体中文 (GB2312)</span>
+                <small>使用 HZK16 + ASC16 简体字库</small>
+              </button>
+              <button class="lang-opt" data-font="cht" role="radio" aria-checked="false">
+                <span>🇭🇰 繁體中文 (BIG5)</span>
+                <small>使用 HZF + ASCF16 繁體字庫</small>
+              </button>
+            </div>
+
+            <div class="setup-group-label">2. 选择启动流程</div>
+            <div class="boot-options" role="radiogroup" aria-label="Boot mode">
+              <button class="boot-opt selected" data-boot="fast" role="radio" aria-checked="true">
+                <span>⚡ 直接进入主菜单 (推荐)</span>
+                <small>跳过片头动画，1.5秒直达《新游戏 / 载入》</small>
+              </button>
+              <button class="boot-opt" data-boot="intro" role="radio" aria-checked="false">
+                <span>🎬 播放片头动画 + 主菜单</span>
+                <small>先播放 1997 西山居水墨剑舞片头 (可按空格跳过)</small>
+              </button>
+            </div>
+
+            <button class="btn-start" id="btnStartGame" disabled>⏳ 正在加载游戏数据…</button>
+            <div class="setup-notes">
+              💿 内置 <b>二号音乐光盘 (23轨原版CD音轨)</b> 实时流式播放 · 💾 游戏内存储进度自动持久化至浏览器 IndexedDB<br>
+              内置初始存档（进度一~五：衡山派·独孤剑），也可直接选择「新游戏」从头体验。
+            </div>
+            <div class="setup-adv"><a href="#" id="linkRedownload">↻ 重新下载游戏数据包 (保留存档)</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="inspector" id="inspector" aria-live="polite">
+        <div class="insp-head">
+          <span class="insp-title">💾 五大存档槽位实时状态 (SAVE0.DAT ~ SAVE4.DAT)</span>
+          <span style="color:var(--muted);font-size:11px">在游戏内按 ESC → 存储进度 即可自动保存至浏览器</span>
+        </div>
+        <div class="slots-grid" id="slotsGrid"></div>
+      </div>
+
+      <div class="vpad" aria-label="On-Screen Controls">
+        <div class="dpad-group">
+          <button class="key-btn" data-key="ArrowUp" data-code="38">▲ 上</button>
+          <button class="key-btn" data-key="ArrowDown" data-code="40">▼ 下</button>
+          <button class="key-btn" data-key="ArrowLeft" data-code="37">◄ 左</button>
+          <button class="key-btn" data-key="ArrowRight" data-code="39">► 右</button>
+        </div>
+        <div class="action-group">
+          <button class="key-btn enter-btn" data-key="Enter" data-code="13">Enter (确认)</button>
+          <button class="key-btn enter-btn" data-key=" " data-code="32">Space (对话/调查)</button>
+          <button class="key-btn esc-btn" data-key="Escape" data-code="27">ESC (系统菜单)</button>
+          <button class="key-btn" data-key="v" data-code="86">V (轻功)</button>
+          <button class="key-btn" data-key="a" data-code="65">A (武功1)</button>
+          <button class="key-btn" data-key="s" data-code="83">S (武功2)</button>
+          <button class="key-btn" data-key="d" data-code="68">D (武功3)</button>
+          <button class="key-btn" data-key="F1" data-code="112">F1</button>
+          <button class="key-btn" data-key="F2" data-code="113">F2</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side-panel">
+      <div class="side-section">
+        <h3>⌨️ 行走与系统操作</h3>
+        <table class="shortcut-table">
+          <tr><td>方向键 ▲▼◄►</td><td>八方向行走 / 菜单移动</td></tr>
+          <tr><td>鼠标左键点击</td><td>移动至目标 / 点击按钮</td></tr>
+          <tr><td>Space / Enter</td><td>与NPC对话 / 调查物品 / 确认</td></tr>
+          <tr><td>ESC</td><td>呼出系统菜单 (状态/物品/武功/存取档)</td></tr>
+          <tr><td>V</td><td>施展轻功 (快速移动)</td></tr>
+          <tr><td>F1 ~ F8</td><td>快捷使用物品栏对应道具</td></tr>
+        </table>
+      </div>
+
+      <div class="side-section">
+        <h3>⚔️ 战斗操作指南</h3>
+        <table class="shortcut-table">
+          <tr><td>方向键 / 鼠标</td><td>移动位置 / 选择攻击目标</td></tr>
+          <tr><td>A / S / D</td><td>施展已设定的快捷武功招式</td></tr>
+          <tr><td>F1 ~ F8</td><td>战斗中快捷使用伤药/内力药</td></tr>
+          <tr><td>菜单 → 武功</td><td>切换招式 / 查看武功等级</td></tr>
+          <tr><td>菜单 → 逃跑</td><td>脱离普通野外战斗</td></tr>
+        </table>
+      </div>
+
+      <div class="side-section">
+        <h3>💿 23轨原版 CD 原声点播</h3>
+        <div class="guide-box">
+          游戏通过 MSCDEX 扇区定位自动切换 <strong>二号音乐光盘 (Track 01 ~ 23)</strong>，您也可以在此手动试听：
+          <select class="track-select" id="trackSelect">
+            <option value="0">-- 跟随游戏自动切换 CD 音轨 --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="side-section">
+        <h3>📖 剧情背景与提示</h3>
+        <div class="guide-box">
+          <strong>南宋绍兴年间</strong>，衡山派掌门之子<strong>独孤剑</strong>奉师命下山通知各派防范金兵，不料卷入金国完颜洪烈争夺<strong>《武穆遗书》</strong>的江湖浩劫，结识张琳心、杨瑛、南宫彩虹等侠女豪杰。<br><br>
+          💡 <strong>提示</strong>：进入「新游戏」时会播放开场配乐并展开北宋靖康之变卷轴字幕；也可随时选择「载入 → 进度一」直接从衡山派大殿开始探索！
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="jszip.min.js?v=jxqy1-web-v1.0"></script>
+  <script src="emulators.js?v=jxqy1-web-v1.0"></script>
+  <script src="main.js?v=jxqy1-web-v1.0"></script>
+</body>
+</html>

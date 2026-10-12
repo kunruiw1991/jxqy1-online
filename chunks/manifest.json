@@ -1,0 +1,59 @@
+{
+  "name": "剑侠情缘1（1997 DOS硬盘整理版·含23轨原版CD音乐）WebAssembly 在线版",
+  "version": "jxqy1-web-v1.0",
+  "total_size": 15097030,
+  "uncompressed_size": 48371517,
+  "file_count": 412,
+  "sha256": "c5a69f858d797c6299d08c3782696e931f80f6a65b360003c2413f43956ee753",
+  "chunks": [
+    {
+      "index": 0,
+      "file": "chunks/jxqy1_data.part00.bin",
+      "size": 1887129,
+      "sha256": "b565abbc65c394fe941ff3539748efb8cc5ed9af5af3d6a4fbd90b7f389576e1"
+    },
+    {
+      "index": 1,
+      "file": "chunks/jxqy1_data.part01.bin",
+      "size": 1887129,
+      "sha256": "59c4c77b45d3484bdd5a00754679af0c415469a2f0704c70334a22b0b63f9d1f"
+    },
+    {
+      "index": 2,
+      "file": "chunks/jxqy1_data.part02.bin",
+      "size": 1887129,
+      "sha256": "f969c43fb8285d17b9f3f3a3c6c40b0c8069943d293e88b8eb21b36da4a7ad3a"
+    },
+    {
+      "index": 3,
+      "file": "chunks/jxqy1_data.part03.bin",
+      "size": 1887129,
+      "sha256": "481f5f75af4ef38a79d925cd9145fd349e19f55dc552526bf06720b5e8703b28"
+    },
+    {
+      "index": 4,
+      "file": "chunks/jxqy1_data.part04.bin",
+      "size": 1887129,
+      "sha256": "0187d41839fc147eccb989c2d2d545e03b4d1cf51a36dd60a6b65206ebdbdab3"
+    },
+    {
+      "index": 5,
+      "file": "chunks/jxqy1_data.part05.bin",
+      "size": 1887129,
+      "sha256": "b199c71497cf1d73f494d142b0809f7ed941a37d2d98b80d77b275bc86194c85"
+    },
+    {
+      "index": 6,
+      "file": "chunks/jxqy1_data.part06.bin",
+      "size": 1887129,
+      "sha256": "44c57e7ebfb8aeb4a5a47f5526b63c46d887b3f2093beb4064c8c0f8c532abf5"
+    },
+    {
+      "index": 7,
+      "file": "chunks/jxqy1_data.part07.bin",
+      "size": 1887127,
+      "sha256": "55ed3af9ab549d02f371982f62c03c62a96bec06fb3ae7fdcfced226bf4ccc9c"
+    }
+  ],
+  "cd_tracks": 23
+}
