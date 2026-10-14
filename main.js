@@ -681,7 +681,7 @@
       gameRunning = true;
 
       if (btnSyncSaveEl) btnSyncSaveEl.disabled = false;
-      setStatus('运行中 (' + FONTS[currentFont].badge + ') — 方向键行走 · Space/Enter 对话 · ESC 系统菜单');
+      setStatus('运行中 (' + FONTS[currentFont].badge + ') — 方向键行走 · Space/Enter 对话 · ESC 或 ~ (`) 系统菜单');
       setTimeout(function () {
         if (loaderPanelEl) loaderPanelEl.style.display = 'none';
       }, 800);
@@ -768,6 +768,11 @@
   var SPECIAL_KEY_MAP = {
     Enter: 257,
     Escape: 256,
+    Backquote: 256,
+    '`': 256,
+    '~': 256,
+    '·': 256,
+    '～': 256,
     Backspace: 259,
     Tab: 258,
     ArrowRight: 262,
@@ -791,6 +796,7 @@
   function mapToDosKeyCode(e) {
     if (SPECIAL_KEY_MAP[e.key]) return SPECIAL_KEY_MAP[e.key];
     if (SPECIAL_KEY_MAP[e.code]) return SPECIAL_KEY_MAP[e.code];
+    if (e.keyCode === 192) return 256;
     if (e.key === ' ') return 32;
     if (e.key && e.key.length === 1) {
       var c = e.key.toUpperCase().charCodeAt(0);
